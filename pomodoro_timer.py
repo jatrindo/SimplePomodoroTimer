@@ -28,6 +28,13 @@ class PomodoroTimer(object):
         self.num_sessions = 0
         self.resume_state = TimerStates.WORK
 
+    def resume(self):
+        self.state = self.resume_state
+
+    def pause(self):
+        self.resume_state = self.state
+        self.state = TimerStates.PAUSED
+
     def count_down(self):
         # Do different things in response to the countdown depending on the
         # current state

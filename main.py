@@ -47,14 +47,27 @@ def reset_timer():
     window.title("Pomodoro")
     title_label.config(text="Timer", fg=GREEN)
     checkmarks_label.config(text="")
+    start_pause_button.config(text="Start")
 
 
 # ---------------------------- TIMER MECHANISM ------------------------------- #
-def start_timer():
-    # Prep the timer
-    pt.start()
-    # Count it down
-    count_down()
+def start_pause_timer():
+    button_state = start_pause_button.cget("text")
+    if button_state == "Start":
+        # Update the text
+        start_pause_button.config(text="Pause")
+        # Prep the timer and count it down
+        pt.start()
+        count_down()
+    elif button_state == "Pause":
+        start_pause_button.config(text="Resume")
+        pt.pause()
+        cancel_timers()
+    elif button_state == "Resume":
+        start_pause_button.config(text="Pause")
+        pt.resume()
+        count_down()
+
 
 
 # ---------------------------- COUNTDOWN MECHANISM ------------------------------- #
@@ -108,8 +121,8 @@ timer_text = canvas.create_text(100, 130, text="00:00", fill="white", font=(FONT
 canvas.grid(row=1, column=1)
 
 # Buttons
-start_button = tk.Button(text="Start", command=start_timer, highlightthickness=0)
-start_button.grid(row=2, column=0)
+start_pause_button = tk.Button(text="Start", command=start_pause_timer, highlightthickness=0)
+start_pause_button.grid(row=2, column=0)
 reset_button = tk.Button(text="Reset", command=reset_timer, highlightthickness=0)
 reset_button.grid(row=2, column=2)
 
