@@ -1,88 +1,88 @@
 import tkinter as tk
-# ---------------------------- CONSTANTS ------------------------------- #
-import math
+from pomodoro_timer import PomodoroTimer
+from timer_states import TimerStates
 
+
+# ---------------------------- CONSTANTS ------------------------------- #
+# Appearance
 PINK = "#e2979c"
 RED = "#e7305b"
 GREEN = "#9bdeac"
 YELLOW = "#f7f5dd"
 FONT_NAME = "Courier"
+
+# Constant Globals
 WORK_MIN = 25
 SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 20
-reps = 0
-total_count = 0
+
+# Timers
 countdown_timer = None
-total_time_timer = None
+
+# Pomodoro Timer
+pt = PomodoroTimer(WORK_MIN, SHORT_BREAK_MIN, LONG_BREAK_MIN)
+
+
+def update_time_displays():
+    tts = PomodoroTimer.ticks_to_str(pt.total_ticks, 'hms')
+    total_time_spent_label.config(text=f"Total Time Spent: {tts}")
+
+    ttext = PomodoroTimer.ticks_to_str(pt.timer_ticks, 'digital')
+    canvas.itemconfig(timer_text, text=f"{ttext}")
+    window.title(f"{title_label.cget('text')}: {ttext}")
+
+
+def cancel_timers():
+    if countdown_timer:
+        window.after_cancel(countdown_timer)
+
 
 # ---------------------------- TIMER RESET ------------------------------- #
 def reset_timer():
-    window.after_cancel(countdown_timer)
-    window.after_cancel(total_time_timer)
+    cancel_timers()
 
-    global reps, total_count
-    reps = 0
-    total_count = 0
+    pt.reset()
+    update_time_displays()
 
-    total_time_spent_label.config(text="Total Time Spent: 00h 00m 00s")
-    canvas.itemconfig(timer_text, text="00:00")
     window.title("Pomodoro")
     title_label.config(text="Timer", fg=GREEN)
     checkmarks_label.config(text="")
 
+
 # ---------------------------- TIMER MECHANISM ------------------------------- #
 def start_timer():
-    global reps
+    # Prep the timer
+    pt.start()
+    # Count it down
+    count_down()
 
-    work_sec = WORK_MIN * 60
-    short_break_sec = SHORT_BREAK_MIN * 60
-    long_break_sec = LONG_BREAK_MIN * 60
-
-    reps += 1
-    if reps % 8 == 0:
-        # Every 8 reps we take a long break
-        title_label.config(text="Break", fg=RED)
-        count_down(long_break_sec)
-    elif reps % 2 == 0:
-        # Every even (non-8) reps we take a short break
-        title_label.config(text="Break", fg=PINK)
-        count_down(short_break_sec)
-    else:
-        # Every odd rep we work
-        title_label.config(text="Work", fg=GREEN)
-        count_down(work_sec)
-
-# ---------------------------- COUNTUP MECHANISM ------------------------------- #
-def count_up():
-    # Update total time spent
-    global total_count
-    total_count += 1
-
-    total_hours = total_count // 3600
-    total_minutes = (total_count // 60) % 60
-    total_seconds = total_count % 60
-    total_time_spent_label.config(text=f"Total Time Spent: "
-                                       f"{total_hours:02d}h {total_minutes:02d}m {total_seconds:02d}s")
 
 # ---------------------------- COUNTDOWN MECHANISM ------------------------------- #
-def count_down(count):
+def count_down():
+    global countdown_timer
 
-    # Update countdown
-    minutes = count // 60
-    seconds = count % 60
+    # Next tick
+    pt.count_down()
 
-    time = f"{minutes:02d}:{seconds:02d}"
-    canvas.itemconfig(timer_text, text=time)
-    window.title(f"{title_label.cget('text')}: {time}")
-    if count > 0:
-        global countdown_timer, total_time_timer
-        countdown_timer = window.after(1000, count_down, count - 1)   # Call this function again after a second
-        total_time_timer = window.after(1000, count_up)
-    else:
-        start_timer()
-        if reps % 2 == 0:
-            checkmarks = "✓" * (reps // 2)
-            checkmarks_label.config(text=checkmarks)
+    update_time_displays()
+
+    if pt.state == TimerStates.WORK:
+        title_label.config(text="Work", fg=GREEN)
+
+    if pt.state == TimerStates.SHORT_BREAK:
+        checkmarks_label.config(text="✓" * pt.num_sessions)
+        title_label.config(text="Break", fg=PINK)
+
+    if pt.state == TimerStates.LONG_BREAK:
+        checkmarks_label.config(text="✓" * pt.num_sessions)
+        title_label.config(text="Break", fg=RED)
+
+    if pt.state == TimerStates.PAUSED:
+        title_label.config(text="Paused", fg=YELLOW)
+
+    # Count down again after a second
+    countdown_timer = window.after(1000, count_down)
+
 
 # ---------------------------- UI SETUP ------------------------------- #
 window = tk.Tk()
