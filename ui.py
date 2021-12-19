@@ -1,6 +1,9 @@
+import json
 import tkinter as tk
 from pomodoro_timer import PomodoroTimer
 from timer_states import TimerStates
+import datetime as dt
+import calendar
 
 # Appearance
 PINK = "#e2979c"
@@ -15,10 +18,13 @@ class PomodoroInterface(object):
     def __init__(self, ptimer):
         self.ptimer = ptimer
         self.countdown_timer = None
+        self.start_time = ""
 
+        # Window
         self.window = tk.Tk()
         self.window.title("Pomodoro")
         self.window.config(padx=100, pady=50, bg=YELLOW)
+        self.window.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         # Labels
         self.title_label = tk.Label(text="Timer", fg=GREEN, bg=YELLOW, font=(FONT_NAME, 28, "bold"))
@@ -69,9 +75,13 @@ class PomodoroInterface(object):
 
     def reset_timer(self):
         self.cancel_timers()
+        # Don't save if we were idle and the user pressed the reset button
+        if self.ptimer.state != TimerStates.IDLE:
+            self.save_session()
 
         self.ptimer.reset()
         self.update_time_displays()
+        self.start_time = ""
 
         self.window.title("Pomodoro")
         self.title_label.config(text="Timer", fg=GREEN)
@@ -82,6 +92,7 @@ class PomodoroInterface(object):
         button_state = self.start_pause_button.cget("text")
         if button_state == "Start":
             # Update the text
+            self.start_time = self.get_current_time()
             self.start_pause_button.config(text="Pause")
             # Prep the timer and count it down
             self.ptimer.start()
@@ -117,3 +128,51 @@ class PomodoroInterface(object):
 
         # Count down again after a second
         self.countdown_timer = self.window.after(1000, self.count_down)
+
+    def save_session(self):
+        session_file = "session_log.json"
+
+        try:
+            with open(session_file, 'r') as f:
+                session_data = json.load(f)
+        except FileNotFoundError:
+            session_data = {
+                "sessions": []
+            }
+
+        current_session = {
+            "date": self.get_current_date(),
+            "day_of_week": self.get_current_day_of_week(),
+            "activity_title": self.current_activity_entry.get(),
+            "start_time": self.start_time,
+            "end_time": self.get_current_time(),
+            "num_completed_sessions": self.ptimer.num_sessions,
+            "total_time_seconds": self.ptimer.total_ticks,
+            "total_time_hms": PomodoroTimer.ticks_to_str(
+                self.ptimer.total_ticks, 'hms'
+            )
+        }
+
+        session_data.get("sessions").append(current_session)
+
+        with open(session_file, 'w') as f:
+            json.dump(session_data, f, indent=4)
+
+    def on_closing(self):
+        # Save the session if it's in-progress
+        if self.ptimer.state != TimerStates.IDLE:
+            self.save_session()
+
+        self.window.destroy()
+
+    @staticmethod
+    def get_current_time():
+        return str(dt.datetime.now())
+
+    @staticmethod
+    def get_current_date():
+        return str(dt.datetime.now().date())
+
+    @staticmethod
+    def get_current_day_of_week():
+        return calendar.day_name[dt.datetime.now().weekday()]
