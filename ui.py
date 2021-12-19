@@ -31,7 +31,7 @@ class PomodoroInterface(object):
         self.title_label.grid(row=0, column=1)
 
         self.checkmarks_label = tk.Label(fg=GREEN, bg=YELLOW, font=(FONT_NAME, 30, "bold"))
-        self.checkmarks_label.grid(row=4, column=1)
+        self.checkmarks_label.grid(row=5, column=1)
 
         self.total_time_spent_label = tk.Label(
             text="Total Time Spent: 00h 00m 00s",
@@ -39,12 +39,17 @@ class PomodoroInterface(object):
             bg=YELLOW,
             font=(FONT_NAME, 20, "bold")
         )
-        self.total_time_spent_label.grid(row=5, column=0, columnspan=3)
+        self.total_time_spent_label.grid(row=6, column=0, columnspan=3)
 
         # Entries
         self.current_activity_entry = tk.Entry(width=27)
         self.current_activity_entry.insert(tk.END, string="Activity Here!")
         self.current_activity_entry.grid(row=3, column=1)
+
+        # Text Boxes
+        self.activity_detail_text = tk.Text(height=5, width=35)
+        self.activity_detail_text.insert(tk.END, "Activity Detail")
+        self.activity_detail_text.grid(row=4, column=1, pady=1)
 
         # Tomato Image with Timer
         self.canvas = tk.Canvas(width=200, height=224, bg=YELLOW, highlightthickness=0)
@@ -141,16 +146,15 @@ class PomodoroInterface(object):
             }
 
         current_session = {
-            "date": self.get_current_date(),
-            "day_of_week": self.get_current_day_of_week(),
-            "activity_title": self.current_activity_entry.get(),
-            "start_time": self.start_time,
-            "end_time": self.get_current_time(),
-            "num_completed_sessions": self.ptimer.num_sessions,
-            "total_time_seconds": self.ptimer.total_ticks,
-            "total_time_hms": PomodoroTimer.ticks_to_str(
-                self.ptimer.total_ticks, 'hms'
-            )
+            "date": self.__get_current_date(),
+            "day_of_week": self.__get_current_day_of_week(),
+            "activity_title": self.__get_activity_title(),
+            "activity_detail": self.__get_activity_detail(),
+            "start_time": self.__get_start_time(),
+            "end_time": self.__get_end_time(),
+            "num_completed_sessions": self.__get_num_completed_sessions(),
+            "total_time_seconds": self.__get_total_seconds(),
+            "total_time_hms": self.__get_total_time_hms()
         }
 
         session_data.get("sessions").append(current_session)
@@ -166,13 +170,34 @@ class PomodoroInterface(object):
         self.window.destroy()
 
     @staticmethod
-    def get_current_time():
+    def __get_current_time():
         return str(dt.datetime.now())
 
     @staticmethod
-    def get_current_date():
+    def __get_current_date():
         return str(dt.datetime.now().date())
 
     @staticmethod
-    def get_current_day_of_week():
+    def __get_current_day_of_week():
         return calendar.day_name[dt.datetime.now().weekday()]
+
+    def __get_activity_title(self):
+        return self.current_activity_entry.get()
+
+    def __get_activity_detail(self):
+        return self.activity_detail_text.get("1.0", tk.END).strip()
+
+    def __get_start_time(self):
+        return self.start_time
+
+    def __get_end_time(self):
+        return self.get_current_time()
+
+    def __get_num_completed_sessions(self):
+        return self.ptimer.num_sessions
+
+    def __get_total_seconds(self):
+        return self.ptimer.total_ticks
+
+    def __get_total_time_hms(self):
+        return PomodoroTimer.ticks_to_str(self.ptimer.total_ticks, 'hms')
