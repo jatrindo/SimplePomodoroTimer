@@ -97,7 +97,7 @@ class PomodoroInterface(object):
         button_state = self.start_pause_button.cget("text")
         if button_state == "Start":
             # Update the text
-            self.start_time = self.get_current_time()
+            self.start_time = self.__get_current_time()
             self.start_pause_button.config(text="Pause")
             # Prep the timer and count it down
             self.ptimer.start()
@@ -191,7 +191,7 @@ class PomodoroInterface(object):
         return self.start_time
 
     def __get_end_time(self):
-        return self.get_current_time()
+        return self.__get_current_time()
 
     def __get_num_completed_sessions(self):
         return self.ptimer.num_sessions
