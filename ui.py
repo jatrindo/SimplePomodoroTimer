@@ -1,10 +1,10 @@
 import json
 import tkinter as tk
 from pomodoro_timer import PomodoroTimer
+from sound_manager import SoundManager
 from timer_states import TimerStates
 import datetime as dt
 import calendar
-from playsound import playsound
 
 # Appearance
 PINK = "#e2979c"
@@ -16,8 +16,9 @@ FONT_NAME = "Courier"
 
 class PomodoroInterface(object):
 
-    def __init__(self, ptimer):
+    def __init__(self, ptimer, sound_manager: SoundManager):
         self.ptimer = ptimer
+        self.sound_manager = sound_manager
         self.countdown_timer = None
         self.start_time = ""
 
@@ -126,12 +127,12 @@ class PomodoroInterface(object):
                 self.title_label.config(text="Work", fg=GREEN)
 
             if current_state == TimerStates.SHORT_BREAK:
-                playsound("bell_ding.wav", False)
+                self.sound_manager.play_enter_short_break_sound()
                 self.checkmarks_label.config(text="✓" * self.ptimer.num_sessions)
                 self.title_label.config(text="Break", fg=PINK)
 
             if current_state == TimerStates.LONG_BREAK:
-                playsound("phone_ding.wav", False)
+                self.sound_manager.play_enter_long_break_sound()
                 self.checkmarks_label.config(text="✓" * self.ptimer.num_sessions)
                 self.title_label.config(text="Break", fg=RED)
 
