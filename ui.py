@@ -141,7 +141,7 @@ class PomodoroInterface(object):
                 self.title_label.config(text="Paused", fg=YELLOW)
 
         # Count down again after a second
-        self.countdown_timer = self.window.after(5, self.count_down)
+        self.countdown_timer = self.window.after(1000, self.count_down)
 
     def save_session(self):
         session_file = "test_session_log.json"
