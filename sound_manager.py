@@ -4,7 +4,7 @@ from playsound import playsound
 
 class SoundManager:
 
-    def __init__(self, sounds_dir) -> None:
+    def __init__(self, sounds_dir: str) -> None:
         self.sounds_dir = os.path.abspath(sounds_dir)
 
     def play_enter_short_break_sound(self):

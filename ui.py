@@ -1,10 +1,11 @@
+import calendar
+import datetime as dt
 import json
 import tkinter as tk
+
 from pomodoro_timer import PomodoroTimer
 from sound_manager import SoundManager
 from timer_states import TimerStates
-import datetime as dt
-import calendar
 
 # Appearance
 PINK = "#e2979c"
@@ -16,7 +17,7 @@ FONT_NAME = "Courier"
 
 class PomodoroInterface(object):
 
-    def __init__(self, ptimer, sound_manager: SoundManager):
+    def __init__(self, ptimer: PomodoroTimer, sound_manager: SoundManager):
         self.ptimer = ptimer
         self.sound_manager = sound_manager
         self.countdown_timer = None
