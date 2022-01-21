@@ -4,6 +4,7 @@ from pomodoro_timer import PomodoroTimer
 from timer_states import TimerStates
 import datetime as dt
 import calendar
+from playsound import playsound
 
 # Appearance
 PINK = "#e2979c"
@@ -113,29 +114,35 @@ class PomodoroInterface(object):
 
     def count_down(self):
         # Next tick
+        previous_state = self.ptimer.state
         self.ptimer.count_down()
+        current_state = self.ptimer.state
 
         self.update_time_displays()
 
-        if self.ptimer.state == TimerStates.WORK:
-            self.title_label.config(text="Work", fg=GREEN)
+        # Detect if there was a change of state
+        if previous_state != current_state:
+            if current_state == TimerStates.WORK:
+                self.title_label.config(text="Work", fg=GREEN)
 
-        if self.ptimer.state == TimerStates.SHORT_BREAK:
-            self.checkmarks_label.config(text="✓" * self.ptimer.num_sessions)
-            self.title_label.config(text="Break", fg=PINK)
+            if current_state == TimerStates.SHORT_BREAK:
+                playsound("bell_ding.wav", False)
+                self.checkmarks_label.config(text="✓" * self.ptimer.num_sessions)
+                self.title_label.config(text="Break", fg=PINK)
 
-        if self.ptimer.state == TimerStates.LONG_BREAK:
-            self.checkmarks_label.config(text="✓" * self.ptimer.num_sessions)
-            self.title_label.config(text="Break", fg=RED)
+            if current_state == TimerStates.LONG_BREAK:
+                playsound("phone_ding.wav", False)
+                self.checkmarks_label.config(text="✓" * self.ptimer.num_sessions)
+                self.title_label.config(text="Break", fg=RED)
 
-        if self.ptimer.state == TimerStates.PAUSED:
-            self.title_label.config(text="Paused", fg=YELLOW)
+            if current_state == TimerStates.PAUSED:
+                self.title_label.config(text="Paused", fg=YELLOW)
 
         # Count down again after a second
-        self.countdown_timer = self.window.after(1000, self.count_down)
+        self.countdown_timer = self.window.after(5, self.count_down)
 
     def save_session(self):
-        session_file = "session_log.json"
+        session_file = "test_session_log.json"
 
         try:
             with open(session_file, 'r') as f:
