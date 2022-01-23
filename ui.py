@@ -145,7 +145,7 @@ class PomodoroInterface(object):
         self.countdown_timer = self.window.after(1000, self.count_down)
 
     def save_session(self):
-        session_file = "test_session_log.json"
+        session_file = "session_log.json"
 
         try:
             with open(session_file, 'r') as f:
