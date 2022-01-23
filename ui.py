@@ -125,6 +125,7 @@ class PomodoroInterface(object):
         # Detect if there was a change of state
         if previous_state != current_state:
             if current_state == TimerStates.WORK:
+                self.sound_manager.play_enter_work_session_sound()
                 self.title_label.config(text="Work", fg=GREEN)
 
             if current_state == TimerStates.SHORT_BREAK:
